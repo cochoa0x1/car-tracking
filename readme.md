@@ -1,11 +1,11 @@
 ### Writeup / README
 
-This project detects cars in a video stream. A car classifier is trained on a combination of image color historgrams, downsized raw image data, and histograms of oriented gradients (HOG) features. A siliding window is passed over a video frame at various scales and locates the cars.
+This project detects cars in a video stream. A car classifier is trained on a combination of image color histograms, downsized raw image data, and histograms of oriented gradients (HOG) features. A sliding window is passed over a video frame at various scales and locates the cars.
 
 ### Histogram of Oriented Gradients (HOG)
 
 #### 1. Features
-The classfier used was a linear support vector machine with input feature vectors of color histograms and a 16x16x3 low resolution of the input image expressed as a single vector. Additionally, and most importantly three HOG feature vectors were used, of for each color in a YCrCb colorspace. Extracting the HOG features is done with a call to skimage.feature.hog. This call is wrapped by the get_hog_features function which was provided by udacity. 
+The classifier used was a linear support vector machine with input feature vectors of color histograms and a 16x16x3 low resolution of the input image expressed as a single vector. Additionally, and most importantly three HOG feature vectors were used, of for each color in a YCrCb colorspace. Extracting the HOG features is done with a call to skimage.feature.hog. This call is wrapped by the get_hog_features function which was provided by udacity. 
 
 
 ![alt text]( output_images/sample_car_feature.png "input image") input
@@ -13,9 +13,9 @@ The classfier used was a linear support vector machine with input feature vector
 ![alt text]( output_images/sample_car_single_channel_hog.png "single channel hog") HOG of single channel
 
 #### 2. Hog Parameters:
-Through trial and error I settled on hog paramters of orient = 5, pix_per_cell=8 and,cell_per_block=2. I selected orient as 5 to keep the respresntation fairly general, ie, not too specific for one car or another. Similarly the downsampled image size of 16x16 was used along with 16 bins for the color histogram.
+Through trial and error I settled on hog parameters of orient = 5, pix_per_cell=8 and,cell_per_block=2. I selected orient as 5 to keep the representation fairly general, ie, not too specific for one car or another. Similarly the down sampled image size of 16x16 was used along with 16 bins for the color histogram.
 
-#### 3. I used a linear SVM from scikit learn as my classifier. To train the svm I first partitoined my dataset into a train and test, and scaled the feature vectors using a scikit learn provided scaler.
+#### 3. I used a linear SVM from scikit learn as my classifier. To train the svm I first partitioned my dataset into a train and test, and scaled the feature vectors using a scikit learn provided scaler.
 
 ![alt text]( output_images/sample_car_features.png "non scaled feature vector") non scaled feature vector
 ![alt text]( output_images/sample_car_features_normed.png  "scaled feature vector") scaled feature vector
@@ -39,7 +39,7 @@ The accuracy on the test set was .983
 
 ### Sliding Window Search
 
-#### 1. Slding WIndow:
+#### 1. Sliding Window:
 A sliding window was passed over the frames to find the cars. Since the size of the car was unknown, various scales of windows were used.
 
 After finding some candidate boxes in the image, a heatmap of them was generated to dedupe the boxes via a threshold.
@@ -79,7 +79,7 @@ Here's a [link to my video result](./project_video_result.mp4)
 
 #### 2. False positives and overlap
 
-To reduce false positives I rejected any region that only had a few detections via a threshold. To add smothness and make the classificiation more robust I kept track of the last 5 heatmaps (frames) and summed them prior to calculating my threshold. To increase the performance, I do a detailed search (more search windows) every 5 frames.
+To reduce false positives I rejected any region that only had a few detections via a threshold. To add smoothness and make the classification more robust I kept track of the last 5 heatmaps (frames) and summed them prior to calculating my threshold. To increase the performance, I do a detailed search (more search windows) every 5 frames.
 
 ```python
 global i
@@ -106,5 +106,4 @@ new_frame = draw_boxes(img,extract_car_boxes(full_heat >= threshold), thick=3, c
 
 ### Discussion
 
-Performance was the biggest problem. The sliding window approach, to find a tight bounding box, requires many windows at many scales. I only used three scales which leads to boxes that are sometimes too big and sometimes too small. A smart window search could be used. Perhaps large windows with a recursive subdivision search only on a highly scored match. To do this I would have needed to use something other than sklearn's SVC since it does not support returning match probabilties. A simple logistic classified with softmax output would have been easier to use. The pipeline will likey fail under dramatically different lighting conditions, struggles with occluded cars, and does not do well for vechicles on the horizon. Other approaches yet to be tried would be to just search the area nearest the last car location each frame, then every once in a while, search the entire image aggresively. In other words, track the cars once they are found instead of blindly looking for them each frame.
-
+Performance was the biggest problem. The sliding window approach, to find a tight bounding box, requires many windows at many scales. I only used three scales which leads to boxes that are sometimes too big and sometimes too small. A smart window search could be used. Perhaps large windows with a recursive subdivision search only on a highly scored match. To do this I would have needed to use something other than sklearn's SVC since it does not support returning match probabilities. A simple logistic classified with softmax output would have been easier to use. The pipeline will likey fail under dramatically different lighting conditions, struggles with occluded cars, and does not do well for vehicles on the horizon. Other approaches yet to be tried would be to just search the area nearest the last car location each frame, then every once in a while, search the entire image aggressively. In other words, track the cars once they are found instead of blindly looking for them each frame. Also, cars from the opposing lane are also detected, to fix this a classifier that can detect the front/back of a car could be used and/or knowledge about the lanes location could be included.
