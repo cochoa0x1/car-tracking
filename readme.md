@@ -36,6 +36,8 @@ print('Test Accuracy of SVC = ', round(svc.score(X_test, y_test), 4))
 
 The accuracy on the test set was .983
 
+#### Improving the classifier
+The demands for the classifier were not just high accuracy, but a balance of speed and accuracy as it must be run several times per frame to locate the cars. This made using other kernels in the svm less attractive and also motivated the use of shorter feature vectors. To improve the classifier it is likely more training data would have helped. This could have been achieved with more creative data augmentation such as shifting, adding noise, etc or by including other data sources such as the udacity labeled dataset. Other kinds of classifiers could also be tried such as convolutional neural networks. Using such a classifier would have required changes to the find_cars method so as to batch up all the predict methods to be run on the video card to achieve good enough performance.
 
 ### Sliding Window Search
 
